@@ -1,0 +1,36 @@
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-game-darker text-gray-100 m-0 p-0;
+    font-family: 'Courier New', monospace;
+    min-height: 100vh;
+  }
+}
+
+@layer components {
+  .stat-bar {
+    @apply relative h-6 bg-game-darker border border-game-border overflow-hidden;
+  }
+
+  .stat-bar-fill {
+    @apply absolute top-0 left-0 h-full transition-all duration-500;
+  }
+
+  .game-panel {
+    @apply bg-game-panel border-2 border-game-border rounded-lg p-4 shadow-2xl;
+  }
+
+  .game-button {
+    @apply px-4 py-2 bg-game-gold text-game-darker font-bold rounded border-2 border-yellow-600
+           hover:bg-yellow-500 active:scale-95 transition-all shadow-lg cursor-pointer;
+  }
+
+  .glow-text {
+    text-shadow: 0 0 10px rgba(212, 175, 55, 0.8);
+  }
+}
