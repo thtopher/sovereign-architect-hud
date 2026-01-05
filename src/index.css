@@ -33,4 +33,21 @@
   .glow-text {
     text-shadow: 0 0 10px rgba(212, 175, 55, 0.8);
   }
+
+  /* Custom scrollbar for skill bar */
+  .overflow-x-auto::-webkit-scrollbar {
+    height: 6px;
+  }
+
+  .overflow-x-auto::-webkit-scrollbar-track {
+    @apply bg-game-darker rounded;
+  }
+
+  .overflow-x-auto::-webkit-scrollbar-thumb {
+    @apply bg-game-gold rounded;
+  }
+
+  .overflow-x-auto::-webkit-scrollbar-thumb:hover {
+    @apply bg-yellow-400;
+  }
 }

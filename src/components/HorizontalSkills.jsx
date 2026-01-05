@@ -145,7 +145,7 @@ const HorizontalSkills = ({ sovereignty, setSovereignty }) => {
       </div>
 
       {/* Horizontal Skill Bar - MTG Card Style */}
-      <div className="flex gap-2">
+      <div className="flex gap-2 overflow-x-auto pb-2 -mx-2 px-2">
         {skills.map((skill) => {
           const onCooldown = cooldowns[skill.id]
           const canUse = !onCooldown && (skill.id === 'sovereign_yield' || sovereignty >= skill.cost)
@@ -156,13 +156,13 @@ const HorizontalSkills = ({ sovereignty, setSovereignty }) => {
               onClick={() => activateSkill(skill)}
               disabled={!canUse}
               className={`
-                relative p-2 rounded-lg border-2 flex-1 text-center transition-all flex flex-col items-center justify-center
+                relative p-2 rounded-lg border-2 text-center transition-all flex flex-col items-center justify-center flex-shrink-0
                 shadow-lg bg-gradient-to-b
                 ${canUse
                   ? `${skill.bgGradient} ${skill.color} hover:scale-105 hover:shadow-2xl hover:border-yellow-400 cursor-pointer active:scale-95`
                   : 'bg-gray-800 border-gray-600 opacity-50 cursor-not-allowed'}
               `}
-              style={{ minHeight: '90px' }}
+              style={{ minHeight: '90px', minWidth: '140px' }}
             >
               {/* Icon - smaller */}
               <div className="text-lg mb-1">{skill.icon}</div>
