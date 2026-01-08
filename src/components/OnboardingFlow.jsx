@@ -25,6 +25,15 @@ const OnboardingFlow = ({ onComplete }) => {
   const [selectedPhase, setSelectedPhase] = useState(null)
   const [activeShadows, setActiveShadows] = useState({})
 
+  // Skip to HUD with default values
+  const handleSkip = () => {
+    onComplete({
+      sovereignty: 50,
+      phase: null,
+      shadows: {}
+    })
+  }
+
   const handleSovereigntyNext = () => {
     setStep(2)
   }
@@ -117,6 +126,13 @@ const OnboardingFlow = ({ onComplete }) => {
           >
             Continue
           </button>
+
+          <button
+            onClick={handleSkip}
+            className="w-full mt-3 py-2 text-game-text-dim hover:text-game-text-muted text-xs transition-all"
+          >
+            Skip to HUD →
+          </button>
         </div>
       </div>
     )
@@ -155,6 +171,13 @@ const OnboardingFlow = ({ onComplete }) => {
               )
             })}
           </div>
+
+          <button
+            onClick={handleSkip}
+            className="w-full mt-4 py-2 text-game-text-dim hover:text-game-text-muted text-xs transition-all"
+          >
+            Skip to HUD →
+          </button>
         </div>
       </div>
     )
@@ -247,6 +270,13 @@ const OnboardingFlow = ({ onComplete }) => {
             className="w-full py-3 bg-game-gold bg-opacity-20 hover:bg-opacity-30 border border-game-gold text-game-gold font-bold rounded transition-all"
           >
             Enter HUD
+          </button>
+
+          <button
+            onClick={handleSkip}
+            className="w-full mt-3 py-2 text-game-text-dim hover:text-game-text-muted text-xs transition-all"
+          >
+            Skip to HUD →
           </button>
         </div>
       </div>
