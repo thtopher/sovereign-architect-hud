@@ -1,131 +1,13 @@
-import { useState } from 'react'
-import { Check, AlertTriangle } from 'lucide-react'
+import { useState, useMemo } from 'react'
+import { Check, AlertTriangle, RefreshCw } from 'lucide-react'
+import { getTodaysQuestions, instructions } from '../constants/checkinQuestions'
 
 const DailyPrompts = ({ timeOfDay, onCheckinResponse }) => {
   const [responses, setResponses] = useState({})
   const [completed, setCompleted] = useState(false)
 
-  const instructions = {
-    morning: {
-      title: 'Morning Protocol Complete',
-      actions: [
-        'Protect time for architectural work (1-3 priorities identified)',
-        'Do not allow calendar to fill with only execution tasks',
-        'If Sovereignty is low, adjust expectations downward',
-        'Check for active shadow mechanics before engaging'
-      ],
-      reminder: 'Design work > Execution work. Protect this ratio.'
-    },
-    afternoon: {
-      title: 'Mid-Day Recalibration Complete',
-            actions: [
-        'If Sovereignty depleted, create space for restoration',
-        'Put down False Responsibility burdens identified',
-        'Redirect intensity-seeking toward depth, not novelty',
-        'Cancel/postpone what can be moved if resources low'
-      ],
-      reminder: 'The second half of the day requires intentional resource management.'
-    },
-    evening: {
-      title: 'Evening Integration Complete',
-            actions: [
-        'Acknowledge completions (even if they don\'t feel satisfying)',
-        'Plan specific Recovery action for tonight',
-        'If intervention occurred today, Release MUST happen before sleep',
-        'Make explicit choice for surrender, not passive consumption'
-      ],
-      reminder: 'Without Release, tomorrow starts depleted. Choose your surrender.'
-    },
-    night: {
-      title: 'Night Protocol Complete',
-            actions: [
-        'If no Release occurred, system will start tomorrow depleted',
-        'Chosen surrender restores Sovereignty (play, intimacy, rest)',
-        'Forced rest does NOT restore - choice is essential',
-        'Loop completion requires this phase'
-      ],
-      reminder: 'Release is not optional. The loop requires all phases.'
-    }
-  }
-
-  const promptSets = {
-    morning: [
-      {
-        id: 'resource',
-        question: 'What is my Sovereignty level this morning?',
-        type: 'choice',
-        options: ['High (80+%)', 'Moderate (60-80%)', 'Low (40-60%)', 'Critical (<40%)']
-      },
-      {
-        id: 'loop',
-        question: 'Where am I in the identity loop?',
-        type: 'choice',
-        options: ['Knowledge', 'Observation', 'Pattern Recognition', 'Creation', 'Deployment', 'Release', 'Reconstitution']
-      },
-      {
-        id: 'priority',
-        question: 'What is the architectural work today? (1-3 things)',
-        type: 'text',
-        placeholder: 'Design work, not execution...'
-      }
-    ],
-    afternoon: [
-      {
-        id: 'resource_check',
-        question: 'Has Sovereignty shifted since morning?',
-        type: 'choice',
-        options: ['Increased', 'Stable', 'Decreased', 'Depleted']
-      },
-      {
-        id: 'false_responsibility',
-        question: 'Have I picked up anything that is not mine today?',
-        type: 'choice',
-        options: ['No', 'Yes, but I can release it', 'Yes, and it\'s accumulating']
-      },
-      {
-        id: 'intensity',
-        question: 'Am I seeking intensity to cope?',
-        type: 'choice',
-        options: ['No', 'Yes, redirect to depth', 'Yes, creating conflict']
-      }
-    ],
-    evening: [
-      {
-        id: 'completions',
-        question: 'What was completed today?',
-        type: 'text',
-        placeholder: 'Acknowledge completions...'
-      },
-      {
-        id: 'unfinished',
-        question: 'What remains unfinished?',
-        type: 'choice',
-        options: ['Appropriately unfinished (continues tomorrow)', 'Problematically unfinished (abandoned)']
-      },
-      {
-        id: 'recovery',
-        question: 'What will restore Sovereignty tonight?',
-        type: 'text',
-        placeholder: 'Specific choice for release...'
-      }
-    ],
-    night: [
-      {
-        id: 'release',
-        question: 'Has Release occurred today?',
-        type: 'choice',
-        options: ['Yes, chosen surrender', 'No, need to force Release phase', 'Partial']
-      },
-      {
-        id: 'tomorrow',
-        question: 'Will tomorrow start depleted?',
-        type: 'choice',
-        options: ['No, resources restored', 'Yes, need rest', 'Uncertain']
-      }
-    ]
-  }
-
-  const prompts = promptSets[timeOfDay] || promptSets.morning
+  // Get today's questions (memoized so they don't change during session)
+  const prompts = useMemo(() => getTodaysQuestions(timeOfDay), [timeOfDay])
 
   const handleResponse = (promptId, value) => {
     setResponses({
@@ -143,121 +25,222 @@ const DailyPrompts = ({ timeOfDay, onCheckinResponse }) => {
 
   const allAnswered = prompts.every(p => responses[p.id])
 
+  // Generate dynamic protocol based on responses
   const generateDynamicProtocol = () => {
     const actions = []
     let title = ''
     let warning = false
     let reminder = ''
 
-    if (timeOfDay === 'afternoon') {
-      title = 'Mid-Day Recalibration Complete'
+    // Get base instructions
+    const baseInstruction = instructions[timeOfDay] || instructions.morning
+    title = baseInstruction.title
+    reminder = baseInstruction.reminder
 
-      // Analyze resource level
-      if (responses.resource_check === 'Depleted') {
-        actions.push('CRITICAL: Create immediate space for restoration')
-        actions.push('Cancel/postpone non-essential items for rest of day')
-        actions.push('Use Sovereign Yield skill if available')
-        warning = true
-      } else if (responses.resource_check === 'Decreased') {
-        actions.push('Sovereignty dropping - identify what\'s draining you')
-        actions.push('Reduce expectations for second half of day')
-        actions.push('Consider using Walling skill to set boundaries')
-      } else if (responses.resource_check === 'Stable') {
-        actions.push('Maintain current pace - resources holding steady')
-      } else if (responses.resource_check === 'Increased') {
-        actions.push('Resources strong - this is capacity for depth work')
-        actions.push('Don\'t squander restored Sovereignty on execution tasks')
+    // Analyze responses by category
+    const resourceResponse = responses.resource || responses.resourceShift
+    const boundaryResponse = responses.boundaryCheck
+    const shadowResponse = responses.shadowCheck
+    const patternResponse = responses.patternDetection
+    const releaseResponse = responses.releaseAssessment || responses.surrenderReadiness
+    const tomorrowResponse = responses.tomorrowForecast
+
+    // Morning-specific analysis
+    if (timeOfDay === 'morning') {
+      // Resource assessment
+      if (resourceResponse) {
+        const isLow = resourceResponse.toLowerCase().includes('depleted') ||
+                      resourceResponse.toLowerCase().includes('fumes') ||
+                      resourceResponse.toLowerCase().includes('compromised') ||
+                      resourceResponse.toLowerCase().includes('critical')
+        const isStrained = resourceResponse.toLowerCase().includes('strained') ||
+                          resourceResponse.toLowerCase().includes('half') ||
+                          resourceResponse.toLowerCase().includes('limited')
+
+        if (isLow) {
+          actions.push('CRITICAL: Start in conservation mode — 1 priority maximum')
+          actions.push('Identify what caused depletion and prevent tonight')
+          warning = true
+        } else if (isStrained) {
+          actions.push('Reduced capacity: Limit to 1-2 priorities')
+          actions.push('Build in recovery periods throughout the day')
+        } else {
+          actions.push('Capacity available for depth work — protect it')
+        }
       }
 
-      // Analyze false responsibility
-      if (responses.false_responsibility === 'Yes, and it\'s accumulating') {
-        actions.push('WALL IMMEDIATELY: You are carrying others\' burdens')
-        actions.push('Name what is NOT yours and put it down')
-        actions.push('Active Shadow: False Responsibility Drain')
-        warning = true
-      } else if (responses.false_responsibility === 'Yes, but I can release it') {
-        actions.push('Release the burden you identified - do not carry it into evening')
+      // Shadow check
+      if (shadowResponse) {
+        const shadowActive = !shadowResponse.toLowerCase().includes('no') &&
+                            !shadowResponse.toLowerCase().includes('relaxed') &&
+                            !shadowResponse.toLowerCase().includes('connected') &&
+                            !shadowResponse.toLowerCase().includes('clear')
+        if (shadowActive) {
+          actions.push('Shadow pattern detected — apply antidote before engaging')
+          if (shadowResponse.toLowerCase().includes('grip') || shadowResponse.toLowerCase().includes('control')) {
+            actions.push('Over-Control active: Practice intentional release')
+          }
+          if (shadowResponse.toLowerCase().includes('withdraw') || shadowResponse.toLowerCase().includes('isolation')) {
+            actions.push('Isolation pattern: Schedule one connection point today')
+          }
+          warning = warning || shadowResponse.toLowerCase().includes('fully')
+        }
       }
 
-      // Analyze intensity seeking
-      if (responses.intensity === 'Yes, creating conflict') {
-        actions.push('CRITICAL: Intensity Addiction active - you are manufacturing drama')
-        actions.push('Stop. Breathe. Redirect to depth, not chaos')
-        actions.push('Active Shadow: Intensity Addiction')
-        warning = true
-      } else if (responses.intensity === 'Yes, redirect to depth') {
-        actions.push('Good catch - channel intensity toward meaningful work')
-        actions.push('Use Gordian Cut on a complex problem instead')
+      // Anticipation assessment
+      const anticipationResponse = responses.anticipation
+      if (anticipationResponse) {
+        if (anticipationResponse.toLowerCase().includes('wall-to-wall') ||
+            anticipationResponse.toLowerCase().includes('constant')) {
+          actions.push('High holding day ahead — protect micro-recovery moments')
+          warning = true
+        }
       }
-
-      // Set reminder based on overall state
-      if (responses.resource_check === 'Depleted' || responses.false_responsibility === 'Yes, and it\'s accumulating') {
-        reminder = 'The second half requires restoration, not heroics. Adjust expectations now.'
-      } else {
-        reminder = 'The second half of the day requires intentional resource management.'
-      }
-    } else if (timeOfDay === 'morning') {
-      title = 'Morning Protocol Complete'
-
-      if (responses.resource === 'Critical (<40%)') {
-        actions.push('START DEPLETED: Today is recovery mode, not performance mode')
-        actions.push('Limit to 1 priority maximum, or defer entirely')
-        actions.push('Identify what caused depletion and prevent tonight')
-        warning = true
-      } else if (responses.resource === 'Low (40-60%)') {
-        actions.push('Low resources: Reduce scope to 1-2 priorities only')
-        actions.push('Protect rest periods during the day')
-      } else if (responses.resource === 'Moderate (60-80%)') {
-        actions.push('Normal capacity: Protect time for 1-3 architectural priorities')
-        actions.push('Monitor for False Responsibility patterns')
-      } else if (responses.resource === 'High (80+%)') {
-        actions.push('High Sovereignty: This is capacity for depth work')
-        actions.push('Design work > Execution work - protect this ratio')
-        actions.push('Beware intensity-seeking that wastes this resource')
-      }
-
-      reminder = 'Design work > Execution work. Protect this ratio.'
-    } else if (timeOfDay === 'evening') {
-      title = 'Evening Integration Complete'
-
-      if (responses.unfinished === 'Problematically unfinished (abandoned)') {
-        actions.push('Pattern: You are abandoning work, not completing cycles')
-        actions.push('Identify what caused abandonment - lack of resources? Interest?')
-        actions.push('Tomorrow: Protect completion phase of loop')
-        warning = true
-      } else {
-        actions.push('Acknowledge what was completed today (even if unsatisfying)')
-      }
-
-      if (responses.recovery) {
-        actions.push(`Commit to: ${responses.recovery}`)
-        actions.push('This is not optional - Release phase is required')
-      } else {
-        actions.push('Choose specific Release action before sleep')
-        warning = true
-      }
-
-      reminder = 'Without Release, tomorrow starts depleted. Choose your surrender.'
-    } else if (timeOfDay === 'night') {
-      title = 'Night Protocol Complete'
-
-      if (responses.release === 'No, need to force Release phase') {
-        actions.push('CRITICAL: No Release today - tomorrow WILL start depleted')
-        actions.push('Force Release NOW: play, intimacy, chosen rest')
-        actions.push('Passive consumption does NOT restore')
-        warning = true
-      } else if (responses.release === 'Partial') {
-        actions.push('Incomplete Release - some restoration but not full')
-        actions.push('Tomorrow will start below baseline')
-      } else {
-        actions.push('Release complete - loop cycle honored')
-      }
-
-      reminder = 'Release is not optional. The loop requires all phases.'
     }
 
+    // Afternoon-specific analysis
+    if (timeOfDay === 'afternoon') {
+      // Resource shift
+      if (resourceResponse) {
+        const depleted = resourceResponse.toLowerCase().includes('depleted') ||
+                        resourceResponse.toLowerCase().includes('critical') ||
+                        resourceResponse.toLowerCase().includes('empty')
+        const decreased = resourceResponse.toLowerCase().includes('decreased') ||
+                         resourceResponse.toLowerCase().includes('worse') ||
+                         resourceResponse.toLowerCase().includes('low')
+
+        if (depleted) {
+          actions.push('CRITICAL: Create immediate space for restoration')
+          actions.push('Cancel/postpone non-essential remaining items')
+          warning = true
+        } else if (decreased) {
+          actions.push('Resources dropping — identify what\'s draining you')
+          actions.push('Reduce scope for second half of day')
+        } else {
+          actions.push('Holding steady — maintain current approach')
+        }
+      }
+
+      // Boundary check
+      if (boundaryResponse) {
+        const boundaryBroken = boundaryResponse.toLowerCase().includes('accumulating') ||
+                              boundaryResponse.toLowerCase().includes('drowning') ||
+                              boundaryResponse.toLowerCase().includes('everyone')
+        if (boundaryBroken) {
+          actions.push('WALL NOW: You are carrying others\' burdens')
+          actions.push('Name what is NOT yours and put it down')
+          warning = true
+        } else if (boundaryResponse.toLowerCase().includes('yes')) {
+          actions.push('Boundary crossed — release what you picked up before evening')
+        }
+      }
+
+      // Pattern detection
+      if (patternResponse) {
+        if (patternResponse.toLowerCase().includes('spiral') ||
+            patternResponse.toLowerCase().includes('escaping')) {
+          actions.push('Unhealthy pattern running — pause and redirect')
+          warning = true
+        }
+        if (patternResponse.toLowerCase().includes('intensity') ||
+            patternResponse.toLowerCase().includes('drama') ||
+            patternResponse.toLowerCase().includes('chaos')) {
+          actions.push('Intensity addiction active — redirect to depth, not drama')
+          warning = true
+        }
+      }
+    }
+
+    // Evening-specific analysis
+    if (timeOfDay === 'evening') {
+      // Incompletion assessment
+      const incompletionResponse = responses.incompletion
+      if (incompletionResponse) {
+        if (incompletionResponse.toLowerCase().includes('abandoned') ||
+            incompletionResponse.toLowerCase().includes('write-off') ||
+            incompletionResponse.toLowerCase().includes('failure')) {
+          actions.push('Pattern: Abandoning rather than completing cycles')
+          actions.push('Tomorrow: Protect completion phase intentionally')
+          warning = true
+        } else {
+          actions.push('Acknowledge what moved forward, even if incomplete')
+        }
+      }
+
+      // Release planning
+      const releaseText = responses.releasePlanning
+      if (releaseText) {
+        actions.push(`Commit to: ${releaseText}`)
+        actions.push('This is not optional — Release phase is required')
+      } else {
+        actions.push('Choose specific Release action before sleep')
+      }
+
+      // Surrender readiness
+      if (releaseResponse) {
+        if (releaseResponse.toLowerCase().includes('no') ||
+            releaseResponse.toLowerCase().includes('fighting') ||
+            releaseResponse.toLowerCase().includes('struggling')) {
+          actions.push('Protector resisting release — surrender requires practice')
+          actions.push('Start small: 10 minutes of chosen rest')
+          warning = true
+        }
+      }
+    }
+
+    // Night-specific analysis
+    if (timeOfDay === 'night') {
+      // Release assessment
+      if (releaseResponse) {
+        const noRelease = releaseResponse.toLowerCase().includes('no') ||
+                         releaseResponse.toLowerCase().includes('holding') ||
+                         releaseResponse.toLowerCase().includes('forced rest')
+        const partialRelease = releaseResponse.toLowerCase().includes('partial') ||
+                              releaseResponse.toLowerCase().includes('some')
+
+        if (noRelease) {
+          actions.push('CRITICAL: No Release today — tomorrow WILL start depleted')
+          actions.push('Force Release NOW: play, intimacy, chosen rest')
+          actions.push('Passive consumption does NOT restore')
+          warning = true
+        } else if (partialRelease) {
+          actions.push('Incomplete Release — some restoration but not full')
+          actions.push('Tomorrow may start below baseline')
+        } else {
+          actions.push('Release complete — loop cycle honored')
+        }
+      }
+
+      // Tomorrow forecast
+      if (tomorrowResponse) {
+        if (tomorrowResponse.toLowerCase().includes('depleted') ||
+            tomorrowResponse.toLowerCase().includes('definitely') ||
+            tomorrowResponse.toLowerCase().includes('compromised')) {
+          actions.push('Tomorrow forecast: depleted — consider protecting the morning')
+          warning = true
+        }
+        if (tomorrowResponse.toLowerCase().includes('loop') &&
+            (tomorrowResponse.toLowerCase().includes('no') ||
+             tomorrowResponse.toLowerCase().includes('broken'))) {
+          actions.push('Loop not completing — Release phase being skipped')
+          warning = true
+        }
+      }
+
+      // Final release check
+      const finalResponse = responses.finalRelease
+      if (finalResponse) {
+        if (finalResponse.toLowerCase().includes('struggling') ||
+            finalResponse.toLowerCase().includes('weight') ||
+            finalResponse.toLowerCase().includes('dread')) {
+          actions.push('Carrying weight into sleep — explicitly release before rest')
+        }
+      }
+    }
+
+    // If no specific actions generated, use base instructions
     if (actions.length === 0) {
-      return instructions[timeOfDay] || instructions.morning
+      return baseInstruction
     }
 
     return { title, warning, actions, reminder }
@@ -265,7 +248,6 @@ const DailyPrompts = ({ timeOfDay, onCheckinResponse }) => {
 
   const handleComplete = () => {
     setCompleted(true)
-    // Could save to localStorage here
   }
 
   const handleReset = () => {
@@ -275,55 +257,88 @@ const DailyPrompts = ({ timeOfDay, onCheckinResponse }) => {
 
   const instruction = completed ? generateDynamicProtocol() : (instructions[timeOfDay] || instructions.morning)
 
+  // Category labels for display
+  const categoryLabels = {
+    resource: 'Resources',
+    anticipation: 'The Day Ahead',
+    intention: 'Intention',
+    shadowCheck: 'Shadow Scan',
+    resourceShift: 'Resource Check',
+    boundaryCheck: 'Boundaries',
+    patternDetection: 'Patterns',
+    recalibration: 'Adjustment',
+    completion: 'Completions',
+    incompletion: 'What Remains',
+    releasePlanning: 'Release',
+    surrenderReadiness: 'Surrender',
+    releaseAssessment: 'Release Check',
+    tomorrowForecast: 'Tomorrow',
+    nightPatternRecognition: 'Patterns',
+    finalRelease: 'Final Release'
+  }
+
   return (
     <div className="game-panel p-3">
-      <h3 className="font-game text-base text-game-gold mb-3">
-        {timeOfDay.toUpperCase()} CHECK-IN
-      </h3>
+      <div className="flex items-center justify-between mb-3">
+        <h3 className="font-game text-base text-game-gold">
+          {timeOfDay.toUpperCase()} CHECK-IN
+        </h3>
+        {!completed && (
+          <div className="text-[9px] text-game-text-dim flex items-center gap-1">
+            <RefreshCw className="w-3 h-3" />
+            <span>Questions rotate daily</span>
+          </div>
+        )}
+      </div>
 
       {!completed ? (
         <>
           <div className="space-y-3">
             {prompts.map((prompt, index) => (
-          <div key={prompt.id} className="border-b border-game-border pb-3 last:border-0">
-            <p className="text-sm font-bold text-gray-100 mb-2">
-              {index + 1}. {prompt.question}
-            </p>
+              <div key={prompt.id} className="border-b border-game-border pb-3 last:border-0">
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="text-[9px] text-game-gold uppercase tracking-wider">
+                    {categoryLabels[prompt.category] || prompt.category}
+                  </span>
+                </div>
+                <p className="text-sm font-bold text-gray-100 mb-2">
+                  {prompt.question}
+                </p>
 
-            {prompt.type === 'choice' && (
-              <div className="space-y-1.5">
-                {prompt.options.map((option) => (
-                  <label
-                    key={option}
-                    className="flex items-center gap-2 cursor-pointer group"
-                  >
-                    <input
-                      type="radio"
-                      name={prompt.id}
-                      value={option}
-                      checked={responses[prompt.id] === option}
-                      onChange={(e) => handleResponse(prompt.id, e.target.value)}
-                      className="accent-game-gold w-3 h-3"
-                    />
-                    <span className="text-sm text-game-text group-hover:text-game-gold transition-colors">
-                      {option}
-                    </span>
-                  </label>
-                ))}
+                {prompt.type === 'choice' && (
+                  <div className="space-y-1.5">
+                    {prompt.options.map((option) => (
+                      <label
+                        key={option}
+                        className="flex items-center gap-2 cursor-pointer group"
+                      >
+                        <input
+                          type="radio"
+                          name={prompt.id}
+                          value={option}
+                          checked={responses[prompt.id] === option}
+                          onChange={(e) => handleResponse(prompt.id, e.target.value)}
+                          className="accent-game-gold w-3 h-3"
+                        />
+                        <span className="text-sm text-game-text group-hover:text-game-gold transition-colors">
+                          {option}
+                        </span>
+                      </label>
+                    ))}
+                  </div>
+                )}
+
+                {prompt.type === 'text' && (
+                  <textarea
+                    value={responses[prompt.id] || ''}
+                    onChange={(e) => handleResponse(prompt.id, e.target.value)}
+                    placeholder={prompt.placeholder}
+                    className="w-full bg-game-darker border border-game-border rounded p-2 text-sm text-gray-200 placeholder-gray-500 focus:border-game-gold focus:outline-none"
+                    rows="2"
+                  />
+                )}
               </div>
-            )}
-
-            {prompt.type === 'text' && (
-              <textarea
-                value={responses[prompt.id] || ''}
-                onChange={(e) => handleResponse(prompt.id, e.target.value)}
-                placeholder={prompt.placeholder}
-                className="w-full bg-game-darker border border-game-border rounded p-2 text-sm text-gray-200 placeholder-gray-500 focus:border-game-gold focus:outline-none"
-                rows="2"
-              />
-            )}
-            </div>
-          ))}
+            ))}
           </div>
 
           {allAnswered && (
