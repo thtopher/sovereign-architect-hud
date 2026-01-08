@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import TimeContext from './TimeContext'
 import ActivityLog from './ActivityLog'
 import NotePrompt from './NotePrompt'
@@ -7,15 +7,19 @@ import LoopStatus from './LoopStatus'
 import ShadowMonitor from './ShadowMonitor'
 import DailyPrompts from './DailyPrompts'
 import HorizontalSkills from './HorizontalSkills'
-import OnboardingFlow from './OnboardingFlow'
+import FirstTimeNudges, { isFirstTime } from './FirstTimeNudges'
 import useActivityLog from '../hooks/useActivityLog'
 
 const HUD = () => {
   const [currentTime, setCurrentTime] = useState(new Date())
-  const [sovereigntyLevel, setSovereigntyLevel] = useState(75)
-  const [onboardingComplete, setOnboardingComplete] = useState(false)
-  const [initialPhase, setInitialPhase] = useState(null)
-  const [initialShadows, setInitialShadows] = useState({})
+  const [sovereigntyLevel, setSovereigntyLevel] = useState(50) // Default to 50% (neutral)
+
+  // First-time nudge tracking
+  const [showNudges, setShowNudges] = useState(() => isFirstTime())
+  const [sovereigntySet, setSovereigntySet] = useState(false)
+  const [phaseSet, setPhaseSet] = useState(false)
+  const [shadowsChecked, setShadowsChecked] = useState(false)
+  const sessionLogged = useRef(false)
 
   // Activity logging
   const {
@@ -98,6 +102,7 @@ const HUD = () => {
 
   // Handle shadow change - log and show note prompt
   const handleShadowChange = (shadowId, intensity, previousIntensity) => {
+    setShadowsChecked(true) // Mark for nudge dismissal
     const entryId = logShadow(shadowId, intensity)
     const action = intensity ? 'detected' : 'cleared'
     setNotePrompt({
@@ -110,6 +115,7 @@ const HUD = () => {
 
   // Handle sovereignty change - log and show note prompt
   const handleSovereigntyChange = (newValue, oldValue) => {
+    setSovereigntySet(true) // Mark for nudge dismissal
     const entryId = logSovereignty(newValue, oldValue)
     setNotePrompt({
       isOpen: true,
@@ -121,6 +127,7 @@ const HUD = () => {
 
   // Handle loop phase change - log and show note prompt
   const handleLoopPhaseChange = (phase, previousPhase) => {
+    setPhaseSet(true) // Mark for nudge dismissal
     const entryId = logLoopPhase(phase)
     setNotePrompt({
       isOpen: true,
@@ -180,27 +187,13 @@ const HUD = () => {
     setNotePrompt({ isOpen: false, pendingEntryId: null, actionLabel: '', undoData: null })
   }
 
-  // Phase names for logging
-  const phaseNames = [
-    'Intake', 'Reconnaissance', 'Analysis', 'Design',
-    'Execution', 'Holding', 'Release', 'Recovery'
-  ]
+  // Handle nudge completion - log session start
+  const handleNudgesComplete = () => {
+    if (sessionLogged.current) return // Only log once
+    sessionLogged.current = true
 
-  // Handle onboarding completion
-  const handleOnboardingComplete = ({ sovereignty, phase, shadows }) => {
-    setSovereigntyLevel(sovereignty)
-    setInitialPhase(phase)
-    setInitialShadows(shadows)
-    setOnboardingComplete(true)
-
-    // Log the session start
-    const phaseName = phase !== null ? phaseNames[phase] : null
-    logSessionStart(sovereignty, phaseName, shadows)
-  }
-
-  // Show onboarding flow first
-  if (!onboardingComplete) {
-    return <OnboardingFlow onComplete={handleOnboardingComplete} />
+    setShowNudges(false)
+    logSessionStart(sovereigntyLevel, null, {})
   }
 
   return (
@@ -285,13 +278,11 @@ const HUD = () => {
               onPhaseChange={handleLoopPhaseChange}
               entries={entries}
               sovereignty={sovereigntyLevel}
-              initialPhase={initialPhase}
             />
 
             {/* Shadow Monitor */}
             <ShadowMonitor
               onShadowChange={handleShadowChange}
-              initialShadows={initialShadows}
             />
           </div>
         </div>
@@ -309,6 +300,16 @@ const HUD = () => {
         onUndo={handleNoteUndo}
         actionLabel={notePrompt.actionLabel}
       />
+
+      {/* First-time nudges overlay */}
+      {showNudges && (
+        <FirstTimeNudges
+          onComplete={handleNudgesComplete}
+          sovereigntySet={sovereigntySet}
+          phaseSet={phaseSet}
+          shadowsChecked={shadowsChecked}
+        />
+      )}
     </div>
   )
 }
