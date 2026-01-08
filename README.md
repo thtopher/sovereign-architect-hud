@@ -1,89 +1,93 @@
 # Sovereign Architect HUD
 
-An interactive, browser-based HUD (Heads-Up Display) for the Sovereign Architect character build system. Built with React + Tailwind CSS.
+A personal operating system disguised as a game. Browser-based HUD for tracking sovereignty, managing energy expenditure, and maintaining psychological stability through the chaos. Built with React + Tailwind CSS.
 
-## Features
+## Live Demo
 
-### 🕐 Time-Aware Contextual Display
-- Automatically detects time of day (morning/afternoon/evening/night)
-- Shows contextually relevant prompts and protocols
-- Different check-in questions based on time
+https://thtopher.github.io/sovereign-architect-hud/
 
-### 📊 Visual Stats & Meters
-- **Core Attributes Panel** - S+, S, A+, A, C tier stats with visual bars
-- **Sovereignty Resource Meter** - Real-time tracking with color-coded status
-- **Identity Loop Status** - 7-phase cycle tracker
-- **Shadow Mechanics Monitor** - Tracks active failure modes
+## Core Systems
 
-### ✅ Interactive Protocols
-- **Morning Protocol** - Resource check, loop status, priority setting
-- **Afternoon Protocol** - Mid-day recalibration, false responsibility check
-- **Evening Protocol** - Completion inventory, recovery planning
-- **Night Protocol** - Release phase check
+### Sovereignty Tracking
+- Real-time sovereignty meter (0-100%)
+- Manual adjustment with note capture
+- Automatic tracking of gains/losses from skill use
+- Visual status indicators (Critical → Depleted → Strained → Healthy)
 
-### 🎮 Game-Like UI Elements
-- Dark fantasy theme inspired by Diablo/RPG interfaces
-- Animated stat bars and status indicators
-- Real-time updates and transitions
-- Responsive design (works on desktop & mobile)
+### Identity Loop (8 Phases)
+| Phase | Cost | Purpose |
+|-------|------|---------|
+| Intake | Low | Strategic learning, absorbing information |
+| Reconnaissance | Low | Watching, noticing patterns, gathering intel |
+| Analysis | Medium | Making sense of it, strategic thinking |
+| Design | Medium | Solo creation work, building, writing |
+| Execution | High | Shipping, decisions, external output |
+| Holding | Highest | Being present for others, meetings, leadership |
+| Release | Restoration | Letting go, surrendering outcomes |
+| Recovery | Restoration | Rest, solitude, integration |
+
+Each phase has detailed cards explaining signals, notes, and transition guidance.
+
+### Active Skills
+Five skills with intensity levels (Low/Med/High):
+
+- **Sovereign Yield** — Restore through chosen surrender
+- **Walling** — Set boundaries, name what isn't yours
+- **Gordian Cut** — Cut through complexity to the real problem
+- **Decisive Intervention** — Force movement when systems stall
+- **Galvanic Surge** — Rally others (high personal cost)
+
+### Shadow Mechanics
+Four failure modes to track:
+
+- **Over-Control State** — The Protector gripping tight
+- **Isolation Spiral** — Withdrawal from connection
+- **Intensity Addiction** — Seeking chaos over calm
+- **False Responsibility** — Carrying what isn't yours
+
+Each shadow has intensity tracking and specific antidotes.
+
+### Activity Log & Readings
+- Persistent activity log (localStorage)
+- Every action logged with optional notes
+- Exportable log with interpretive reading
+- Arc-based analysis (not just pattern matching)
+- Recognizes recovery, crisis, decline, and stability patterns
+
+### Onboarding Flow
+Stacked modal sequence on first load:
+1. **Sovereignty Check** — Where are your resources?
+2. **Phase Selection** — What are you doing?
+3. **Shadow Scan** — Any patterns active?
+
+Session start is logged for reading context.
 
 ## Quick Start
 
 ```bash
-# Install dependencies
 npm install
-
-# Run development server
 npm run dev
-
-# Build for production
-npm run build
 ```
 
-## Usage
-
-1. Open the app in your browser (default: http://localhost:5173)
-2. The HUD will automatically detect the time of day
-3. Follow the contextual prompts for your current time period
-4. Monitor your resource levels and shadow mechanics
-5. Track your position in the identity loop
-
-## Components
-
-- **HUD.jsx** - Main orchestrator component
-- **TimeContext.jsx** - Time-aware greeting and context
-- **ResourceMeter.jsx** - Sovereignty resource tracking
-- **StatsPanel.jsx** - Core attributes display
-- **LoopStatus.jsx** - Identity loop phase tracker
-- **ShadowMonitor.jsx** - Failure mode detection
-- **DailyPrompts.jsx** - Time-specific check-in questions
+Open http://localhost:5173/sovereign-architect-hud/
 
 ## Design Philosophy
 
 > "You are specialized, not broken."
 
-The HUD is designed to:
-- Provide quick visual feedback on system status
-- Encourage regular check-ins throughout the day
-- Make psychological monitoring feel like gameplay
-- Support the Sovereign Architect operating system
-
-## Future Enhancements
-
-- [ ] Data persistence (localStorage)
-- [ ] Historical tracking and charts
-- [ ] Export daily logs
-- [ ] Custom notifications/reminders
-- [ ] Active Skills activation interface
-- [ ] Growth Path progression tracker
-- [ ] Environmental buff/nerf indicator
+The HUD makes invisible patterns visible:
+- Energy expenditure has real costs — track them
+- "Holding" for others is the highest drain but rarely named
+- The loop cannot complete without Release
+- Awareness without action is just spectatorship
 
 ## Tech Stack
 
-- React 18+
+- React 18
 - Tailwind CSS
 - Vite
+- localStorage for persistence
 
 ---
 
-**Version 1.0** | Built for the Sovereign Architect system
+**Version 1.2** | Meaning Under Chaos
