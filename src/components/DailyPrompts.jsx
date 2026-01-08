@@ -1,13 +1,13 @@
 import { useState } from 'react'
+import { Check, AlertTriangle } from 'lucide-react'
 
-const DailyPrompts = ({ timeOfDay }) => {
+const DailyPrompts = ({ timeOfDay, onCheckinResponse }) => {
   const [responses, setResponses] = useState({})
   const [completed, setCompleted] = useState(false)
 
   const instructions = {
     morning: {
       title: 'Morning Protocol Complete',
-      icon: '✓',
       actions: [
         'Protect time for architectural work (1-3 priorities identified)',
         'Do not allow calendar to fill with only execution tasks',
@@ -18,8 +18,7 @@ const DailyPrompts = ({ timeOfDay }) => {
     },
     afternoon: {
       title: 'Mid-Day Recalibration Complete',
-      icon: '✓',
-      actions: [
+            actions: [
         'If Sovereignty depleted, create space for restoration',
         'Put down False Responsibility burdens identified',
         'Redirect intensity-seeking toward depth, not novelty',
@@ -29,8 +28,7 @@ const DailyPrompts = ({ timeOfDay }) => {
     },
     evening: {
       title: 'Evening Integration Complete',
-      icon: '✓',
-      actions: [
+            actions: [
         'Acknowledge completions (even if they don\'t feel satisfying)',
         'Plan specific Recovery action for tonight',
         'If intervention occurred today, Release MUST happen before sleep',
@@ -40,8 +38,7 @@ const DailyPrompts = ({ timeOfDay }) => {
     },
     night: {
       title: 'Night Protocol Complete',
-      icon: '✓',
-      actions: [
+            actions: [
         'If no Release occurred, system will start tomorrow depleted',
         'Chosen surrender restores Sovereignty (play, intimacy, rest)',
         'Forced rest does NOT restore - choice is essential',
@@ -135,6 +132,13 @@ const DailyPrompts = ({ timeOfDay }) => {
       ...responses,
       [promptId]: value
     })
+
+    // Log each check-in response
+    if (onCheckinResponse) {
+      const prompt = prompts.find(p => p.id === promptId)
+      const question = prompt ? prompt.question : promptId
+      onCheckinResponse(question, value)
+    }
   }
 
   const allAnswered = prompts.every(p => responses[p.id])
@@ -142,7 +146,7 @@ const DailyPrompts = ({ timeOfDay }) => {
   const generateDynamicProtocol = () => {
     const actions = []
     let title = ''
-    let icon = '✓'
+    let warning = false
     let reminder = ''
 
     if (timeOfDay === 'afternoon') {
@@ -153,7 +157,7 @@ const DailyPrompts = ({ timeOfDay }) => {
         actions.push('CRITICAL: Create immediate space for restoration')
         actions.push('Cancel/postpone non-essential items for rest of day')
         actions.push('Use Sovereign Yield skill if available')
-        icon = '⚠️'
+        warning = true
       } else if (responses.resource_check === 'Decreased') {
         actions.push('Sovereignty dropping - identify what\'s draining you')
         actions.push('Reduce expectations for second half of day')
@@ -170,7 +174,7 @@ const DailyPrompts = ({ timeOfDay }) => {
         actions.push('WALL IMMEDIATELY: You are carrying others\' burdens')
         actions.push('Name what is NOT yours and put it down')
         actions.push('Active Shadow: False Responsibility Drain')
-        icon = '⚠️'
+        warning = true
       } else if (responses.false_responsibility === 'Yes, but I can release it') {
         actions.push('Release the burden you identified - do not carry it into evening')
       }
@@ -180,7 +184,7 @@ const DailyPrompts = ({ timeOfDay }) => {
         actions.push('CRITICAL: Intensity Addiction active - you are manufacturing drama')
         actions.push('Stop. Breathe. Redirect to depth, not chaos')
         actions.push('Active Shadow: Intensity Addiction')
-        icon = '⚠️'
+        warning = true
       } else if (responses.intensity === 'Yes, redirect to depth') {
         actions.push('Good catch - channel intensity toward meaningful work')
         actions.push('Use Gordian Cut on a complex problem instead')
@@ -199,7 +203,7 @@ const DailyPrompts = ({ timeOfDay }) => {
         actions.push('START DEPLETED: Today is recovery mode, not performance mode')
         actions.push('Limit to 1 priority maximum, or defer entirely')
         actions.push('Identify what caused depletion and prevent tonight')
-        icon = '⚠️'
+        warning = true
       } else if (responses.resource === 'Low (40-60%)') {
         actions.push('Low resources: Reduce scope to 1-2 priorities only')
         actions.push('Protect rest periods during the day')
@@ -220,7 +224,7 @@ const DailyPrompts = ({ timeOfDay }) => {
         actions.push('Pattern: You are abandoning work, not completing cycles')
         actions.push('Identify what caused abandonment - lack of resources? Interest?')
         actions.push('Tomorrow: Protect completion phase of loop')
-        icon = '⚠️'
+        warning = true
       } else {
         actions.push('Acknowledge what was completed today (even if unsatisfying)')
       }
@@ -230,7 +234,7 @@ const DailyPrompts = ({ timeOfDay }) => {
         actions.push('This is not optional - Release phase is required')
       } else {
         actions.push('Choose specific Release action before sleep')
-        icon = '⚠️'
+        warning = true
       }
 
       reminder = 'Without Release, tomorrow starts depleted. Choose your surrender.'
@@ -241,7 +245,7 @@ const DailyPrompts = ({ timeOfDay }) => {
         actions.push('CRITICAL: No Release today - tomorrow WILL start depleted')
         actions.push('Force Release NOW: play, intimacy, chosen rest')
         actions.push('Passive consumption does NOT restore')
-        icon = '⚠️'
+        warning = true
       } else if (responses.release === 'Partial') {
         actions.push('Incomplete Release - some restoration but not full')
         actions.push('Tomorrow will start below baseline')
@@ -256,7 +260,7 @@ const DailyPrompts = ({ timeOfDay }) => {
       return instructions[timeOfDay] || instructions.morning
     }
 
-    return { title, icon, actions, reminder }
+    return { title, warning, actions, reminder }
   }
 
   const handleComplete = () => {
@@ -301,7 +305,7 @@ const DailyPrompts = ({ timeOfDay }) => {
                       onChange={(e) => handleResponse(prompt.id, e.target.value)}
                       className="accent-game-gold w-3 h-3"
                     />
-                    <span className="text-sm text-gray-300 group-hover:text-game-gold transition-colors">
+                    <span className="text-sm text-game-text group-hover:text-game-gold transition-colors">
                       {option}
                     </span>
                   </label>
@@ -330,35 +334,43 @@ const DailyPrompts = ({ timeOfDay }) => {
             </div>
           )}
 
-          <div className="mt-2 text-[10px] text-gray-600">
+          <div className="mt-2 text-[10px] text-game-text-dim">
             ~3-5 min protocol
           </div>
         </>
       ) : (
         /* Protocol Completed - Show Instructions */
         <div className="space-y-3">
-          <div className="bg-game-green bg-opacity-20 border border-game-green rounded p-3">
-            <div className="flex items-center gap-2 mb-2">
-              <span className="text-xl">{instruction.icon}</span>
-              <h4 className="font-game text-sm text-game-green">
+          <div className={`border rounded p-3 ${instruction.warning ? 'bg-amber-950 bg-opacity-30 border-amber-700 border-opacity-50' : 'bg-zinc-800 border-zinc-600'}`}>
+            <div className="flex items-center gap-2 mb-3">
+              {instruction.warning ? (
+                <div className="w-5 h-5 rounded-full bg-amber-600 flex items-center justify-center">
+                  <AlertTriangle className="w-3 h-3 text-white" strokeWidth={2.5} />
+                </div>
+              ) : (
+                <div className="w-5 h-5 rounded-full bg-emerald-600 flex items-center justify-center">
+                  <Check className="w-3 h-3 text-white" strokeWidth={2.5} />
+                </div>
+              )}
+              <h4 className={`font-game text-sm ${instruction.warning ? 'text-amber-400' : 'text-game-text'}`}>
                 {instruction.title}
               </h4>
             </div>
 
             <div className="mb-3">
-              <p className="text-[10px] text-gray-500 mb-1.5 font-bold">NEXT ACTIONS:</p>
+              <p className="text-[10px] text-game-text-dim mb-1.5 font-semibold">NEXT ACTIONS:</p>
               <ul className="space-y-1.5">
                 {instruction.actions.map((action, index) => (
                   <li key={index} className="flex items-start gap-1.5">
                     <span className="text-game-gold mt-0.5 text-xs">→</span>
-                    <span className="text-xs text-gray-300">{action}</span>
+                    <span className="text-xs text-game-text-muted">{action}</span>
                   </li>
                 ))}
               </ul>
             </div>
 
-            <div className="pt-2 border-t border-game-green border-opacity-30">
-              <p className="text-[10px] text-game-gold italic">
+            <div className="pt-2 border-t border-zinc-700">
+              <p className="text-[10px] text-game-gold">
                 {instruction.reminder}
               </p>
             </div>
@@ -366,8 +378,8 @@ const DailyPrompts = ({ timeOfDay }) => {
 
           <button
             onClick={handleReset}
-            className="w-full px-3 py-1.5 bg-game-darker border border-game-border rounded
-                     hover:border-game-gold transition-all text-xs text-gray-500"
+            className="w-full px-3 py-1.5 bg-zinc-800 border border-zinc-700 rounded
+                     hover:border-zinc-500 transition-all text-xs text-game-text-muted"
           >
             Reset Protocol
           </button>

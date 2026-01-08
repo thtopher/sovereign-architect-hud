@@ -1,38 +1,37 @@
+import { Sunrise, Sun, Moon, Stars } from 'lucide-react'
+
 const TimeContext = ({ timeOfDay, greeting }) => {
   const contexts = {
     morning: {
-      icon: '🌅',
-      message: 'Begin your day with intention. Resource check and priority setting.',
-      color: 'text-orange-400'
+      Icon: Sunrise,
+      message: 'Begin your day with intention. Resource check and priority setting.'
     },
     afternoon: {
-      icon: '☀️',
-      message: 'Mid-point recalibration. Check for False Responsibility and Intensity patterns.',
-      color: 'text-yellow-400'
+      Icon: Sun,
+      message: 'Mid-point recalibration. Check for False Responsibility and Intensity patterns.'
     },
     evening: {
-      icon: '🌙',
-      message: 'Integration time. Review completions and plan for Recovery.',
-      color: 'text-blue-400'
+      Icon: Moon,
+      message: 'Integration time. Review completions and plan for Recovery.'
     },
     night: {
-      icon: '✨',
-      message: 'Release phase. Choose surrender for Sovereignty restoration.',
-      color: 'text-purple-400'
+      Icon: Stars,
+      message: 'Release phase. Choose surrender for Sovereignty restoration.'
     }
   }
 
   const context = contexts[timeOfDay]
+  const IconComponent = context.Icon
 
   return (
-    <div className="game-panel p-3 bg-opacity-50 border-game-gold border-opacity-30">
+    <div className="game-panel p-3 border-zinc-600">
       <div className="flex items-center gap-3">
-        <div className="text-3xl">{context.icon}</div>
+        <IconComponent className="w-7 h-7 text-game-gold" strokeWidth={1.5} />
         <div className="flex-1">
-          <h2 className={`font-game text-base ${context.color} mb-0.5`}>
+          <h2 className="font-game text-base text-game-gold mb-0.5">
             {greeting}
           </h2>
-          <p className="text-gray-300 text-sm">
+          <p className="text-game-text-muted text-sm">
             {context.message}
           </p>
         </div>

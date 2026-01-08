@@ -22,6 +22,11 @@ export default {
         'stat-a-plus': '#ffd93d',
         'stat-a': '#6bcf7f',
         'stat-c': '#95a5a6',
+        // Accessible text colors (WCAG AA compliant on dark backgrounds)
+        'game-text': '#e8eaed',        // Primary text - high contrast
+        'game-text-muted': '#9ca3af',  // Secondary text - good contrast
+        'game-text-dim': '#6b7280',    // Tertiary text - minimum acceptable
+        'game-text-subtle': '#4b5563', // Very subtle but still visible
       },
       fontFamily: {
         'game': ['"Cinzel"', 'serif'],

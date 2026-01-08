@@ -21,17 +21,96 @@
     @apply absolute top-0 left-0 h-full transition-all duration-500;
   }
 
+  /* Fantasy RPG Panel Style */
   .game-panel {
-    @apply bg-game-panel border-2 border-game-border rounded-lg p-4 shadow-2xl;
+    @apply relative p-4 rounded-sm;
+    background: linear-gradient(180deg, #1e2738 0%, #151c28 50%, #0d1219 100%);
+    border: 2px solid transparent;
+    border-image: linear-gradient(
+      135deg,
+      #5a4a2a 0%,
+      #d4af37 15%,
+      #f4d03f 25%,
+      #d4af37 35%,
+      #8b7328 50%,
+      #5a4a2a 65%,
+      #d4af37 80%,
+      #5a4a2a 100%
+    ) 1;
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.05),
+      inset 0 -1px 0 rgba(0, 0, 0, 0.3),
+      0 4px 20px rgba(0, 0, 0, 0.5),
+      0 0 15px rgba(212, 175, 55, 0.1);
+  }
+
+  /* Inner glow effect */
+  .game-panel::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 2px;
+    background: linear-gradient(180deg, rgba(212, 175, 55, 0.04) 0%, transparent 40%);
+    pointer-events: none;
   }
 
   .game-button {
-    @apply px-4 py-2 bg-game-gold text-game-darker font-bold rounded border-2 border-yellow-600
-           hover:bg-yellow-500 active:scale-95 transition-all shadow-lg cursor-pointer;
+    @apply relative px-4 py-2 text-game-darker font-bold transition-all cursor-pointer rounded-sm;
+    background: linear-gradient(180deg, #f4d03f 0%, #d4af37 50%, #b8962e 100%);
+    border: 1px solid #8b7328;
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.4),
+      inset 0 -2px 0 rgba(0, 0, 0, 0.2),
+      0 2px 8px rgba(0, 0, 0, 0.3);
+  }
+
+  .game-button:hover {
+    background: linear-gradient(180deg, #ffe066 0%, #f4d03f 50%, #d4af37 100%);
+    transform: translateY(-1px);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.5),
+      inset 0 -2px 0 rgba(0, 0, 0, 0.2),
+      0 4px 12px rgba(212, 175, 55, 0.4);
+  }
+
+  .game-button:active {
+    transform: translateY(1px) scale(0.98);
   }
 
   .glow-text {
-    text-shadow: 0 0 10px rgba(212, 175, 55, 0.8);
+    text-shadow:
+      0 0 10px rgba(212, 175, 55, 0.8),
+      0 0 20px rgba(212, 175, 55, 0.4),
+      0 0 30px rgba(212, 175, 55, 0.2);
+  }
+
+  /* Corner accents for special panels */
+  .corner-accent {
+    @apply relative;
+  }
+
+  .corner-accent::before,
+  .corner-accent::after {
+    content: '';
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    border: 2px solid #d4af37;
+    pointer-events: none;
+  }
+
+  .corner-accent::before {
+    top: -1px;
+    left: -1px;
+    border-right: none;
+    border-bottom: none;
+  }
+
+  .corner-accent::after {
+    bottom: -1px;
+    right: -1px;
+    border-left: none;
+    border-top: none;
   }
 
   /* Custom scrollbar for skill bar */
@@ -40,14 +119,119 @@
   }
 
   .overflow-x-auto::-webkit-scrollbar-track {
-    @apply bg-game-darker rounded;
+    @apply bg-game-darker;
   }
 
   .overflow-x-auto::-webkit-scrollbar-thumb {
-    @apply bg-game-gold rounded;
+    background: linear-gradient(90deg, #8b7328, #d4af37, #8b7328);
   }
 
   .overflow-x-auto::-webkit-scrollbar-thumb:hover {
-    @apply bg-yellow-400;
+    background: linear-gradient(90deg, #d4af37, #f4d03f, #d4af37);
+  }
+
+  /* Divider line with fantasy style */
+  .fantasy-divider {
+    @apply relative h-px my-4;
+    background: linear-gradient(90deg, transparent, #5a4a2a, #d4af37, #5a4a2a, transparent);
+  }
+
+  .fantasy-divider::before {
+    content: '';
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    width: 8px;
+    height: 8px;
+    background: #d4af37;
+    clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);
+  }
+
+  /* Fantasy Header Bar */
+  .fantasy-header {
+    @apply relative;
+    background: linear-gradient(180deg, #1a1f2e 0%, #0f1419 100%);
+    border-bottom: 3px solid;
+    border-image: linear-gradient(90deg, #5a4a2a, #d4af37, #f4d03f, #d4af37, #5a4a2a) 1;
+    box-shadow:
+      0 4px 20px rgba(0, 0, 0, 0.5),
+      inset 0 1px 0 rgba(255, 255, 255, 0.03);
+  }
+
+  .fantasy-header::after {
+    content: '';
+    position: absolute;
+    bottom: -3px;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(212, 175, 55, 0.3), transparent);
+  }
+
+  /* Fantasy stat bar */
+  .fantasy-stat-bar {
+    @apply relative h-4 overflow-hidden rounded-sm;
+    background: linear-gradient(180deg, #0a0e14 0%, #151c28 100%);
+    border: 1px solid;
+    border-image: linear-gradient(135deg, #5a4a2a, #d4af37, #5a4a2a) 1;
+    box-shadow: inset 0 1px 3px rgba(0,0,0,0.5);
+  }
+
+  .fantasy-stat-bar::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, rgba(255,255,255,0.05) 0%, transparent 50%);
+    pointer-events: none;
+  }
+
+  /* Slider styling */
+  input[type="range"] {
+    -webkit-appearance: none;
+    appearance: none;
+    background: transparent;
+  }
+
+  input[type="range"]::-webkit-slider-runnable-track {
+    height: 6px;
+    background: linear-gradient(180deg, #0a0e14 0%, #1a1f2e 100%);
+    border: 1px solid #5a4a2a;
+    border-radius: 2px;
+  }
+
+  input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 16px;
+    height: 16px;
+    margin-top: -6px;
+    background: linear-gradient(180deg, #f4d03f 0%, #d4af37 50%, #8b7328 100%);
+    border: 2px solid #5a4a2a;
+    border-radius: 2px;
+    cursor: pointer;
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,0.4),
+      0 2px 4px rgba(0,0,0,0.3);
+  }
+
+  input[type="range"]::-webkit-slider-thumb:hover {
+    background: linear-gradient(180deg, #ffe066 0%, #f4d03f 50%, #d4af37 100%);
+  }
+
+  input[type="range"]::-moz-range-track {
+    height: 6px;
+    background: linear-gradient(180deg, #0a0e14 0%, #1a1f2e 100%);
+    border: 1px solid #5a4a2a;
+    border-radius: 2px;
+  }
+
+  input[type="range"]::-moz-range-thumb {
+    width: 14px;
+    height: 14px;
+    background: linear-gradient(180deg, #f4d03f 0%, #d4af37 50%, #8b7328 100%);
+    border: 2px solid #5a4a2a;
+    border-radius: 2px;
+    cursor: pointer;
   }
 }

@@ -1,4 +1,9 @@
-const StickyResourceBar = ({ sovereignty, setSovereignty }) => {
+import { useState, useRef } from 'react'
+
+const StickyResourceBar = ({ sovereignty, setSovereignty, onSovereigntyChange }) => {
+  const [isDragging, setIsDragging] = useState(false)
+  const startValueRef = useRef(sovereignty)
+
   const getStatusColor = () => {
     if (sovereignty >= 80) return 'bg-game-green'
     if (sovereignty >= 60) return 'bg-game-blue'
@@ -14,23 +19,38 @@ const StickyResourceBar = ({ sovereignty, setSovereignty }) => {
     return 'COLLAPSE'
   }
 
+  const handleSliderStart = () => {
+    setIsDragging(true)
+    startValueRef.current = sovereignty
+  }
+
+  const handleSliderEnd = () => {
+    setIsDragging(false)
+    const newValue = sovereignty
+    const oldValue = startValueRef.current
+    // Only log if value actually changed
+    if (newValue !== oldValue && onSovereigntyChange) {
+      onSovereigntyChange(newValue, oldValue)
+    }
+  }
+
   return (
-    <div className="sticky top-0 z-50 bg-game-darker border-b-2 border-game-gold py-2 px-3 md:px-4 shadow-xl">
+    <div className="sticky top-0 z-50 fantasy-header py-2 px-3 md:px-4">
       <div className="max-w-7xl mx-auto">
         <div className="flex items-center gap-2 md:gap-4">
           {/* Title */}
           <div className="flex-shrink-0">
-            <span className="font-game text-xs md:text-sm text-game-gold">SOVEREIGNTY</span>
+            <span className="font-game text-xs md:text-sm text-game-gold glow-text">SOVEREIGNTY</span>
           </div>
 
           {/* Bar - smaller text on mobile */}
           <div className="flex-1 min-w-0">
-            <div className="stat-bar h-3 md:h-4">
+            <div className="fantasy-stat-bar h-4 md:h-5">
               <div
-                className={`stat-bar-fill ${getStatusColor()} flex items-center justify-center`}
+                className={`h-full ${getStatusColor()} flex items-center justify-center transition-all duration-500`}
                 style={{ width: `${sovereignty}%` }}
               >
-                <span className="text-[8px] md:text-[10px] font-bold text-white whitespace-nowrap px-1">
+                <span className="text-[8px] md:text-[10px] font-bold text-white whitespace-nowrap px-1 drop-shadow-md">
                   {sovereignty > 20 && (
                     <>
                       <span className="hidden sm:inline">{sovereignty}% - {getStatusText()}</span>
@@ -47,7 +67,7 @@ const StickyResourceBar = ({ sovereignty, setSovereignty }) => {
             <span className="text-base md:text-lg font-bold text-game-gold">{sovereignty}%</span>
           </div>
 
-          {/* Demo slider - responsive width */}
+          {/* Slider */}
           <div className="flex-shrink-0 w-20 md:w-32">
             <input
               type="range"
@@ -55,6 +75,10 @@ const StickyResourceBar = ({ sovereignty, setSovereignty }) => {
               max="100"
               value={sovereignty}
               onChange={(e) => setSovereignty(parseInt(e.target.value))}
+              onMouseDown={handleSliderStart}
+              onMouseUp={handleSliderEnd}
+              onTouchStart={handleSliderStart}
+              onTouchEnd={handleSliderEnd}
               className="w-full h-2 accent-game-gold cursor-pointer"
             />
           </div>
