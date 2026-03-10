@@ -35,7 +35,7 @@ const StickyResourceBar = ({ sovereignty, setSovereignty, onSovereigntyChange })
   }
 
   return (
-    <div className="sticky top-0 z-50 fantasy-header py-2 px-3 md:px-4">
+    <div className="sticky top-[41px] z-50 fantasy-header py-2 px-3 md:px-4">
       <div className="max-w-7xl mx-auto">
         <div className="flex items-center gap-2 md:gap-4">
           {/* Title */}
