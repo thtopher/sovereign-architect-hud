@@ -11,15 +11,12 @@ import FirstTimeNudges, { isFirstTime } from './FirstTimeNudges'
 import SyncSettings from './SyncSettings'
 import useActivityLog from '../hooks/useActivityLog'
 import useGameState from '../hooks/useGameState'
-import useSync from '../hooks/useSync'
 
-const HUD = () => {
+const HUD = ({ sync }) => {
   const [currentTime, setCurrentTime] = useState(new Date())
   const gameState = useGameState()
   const { sovereigntyLevel, setSovereigntyLevel, currentPhase, shadows } = gameState
 
-  // Cloud sync
-  const sync = useSync()
   const [showSyncSettings, setShowSyncSettings] = useState(false)
 
   // Hydrate game state from remote data when sync pulls

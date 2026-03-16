@@ -84,6 +84,13 @@ export default function usePortfolio() {
     return () => clearTimeout(saveTimeout.current)
   }, [projects])
 
+  // Hydrate from remote data (called after sync pull)
+  const hydrateFromRemote = useCallback((remotePortfolio) => {
+    if (Array.isArray(remotePortfolio)) {
+      setProjects(remotePortfolio)
+    }
+  }, [])
+
   const touchActivity = (project) => ({
     ...project,
     last_activity_at: new Date().toISOString()
@@ -256,5 +263,6 @@ export default function usePortfolio() {
     reorderSpotlight,
     promoteToSpotlight,
     exportToMarkdown,
+    hydrateFromRemote,
   }
 }

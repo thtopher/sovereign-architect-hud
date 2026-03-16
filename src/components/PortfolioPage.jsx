@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { DndContext, closestCenter, PointerSensor, TouchSensor, useSensor, useSensors } from '@dnd-kit/core'
 import { SortableContext, rectSortingStrategy, arrayMove } from '@dnd-kit/sortable'
 import { Plus, ChevronDown, ChevronRight, Download } from 'lucide-react'
@@ -8,7 +8,7 @@ import RosterRow from './RosterRow'
 import CreateProjectModal from './CreateProjectModal'
 import ProjectDetail from './ProjectDetail'
 
-const PortfolioPage = () => {
+const PortfolioPage = ({ sync }) => {
   const {
     spotlight,
     roster,
@@ -20,7 +20,15 @@ const PortfolioPage = () => {
     reorderSpotlight,
     promoteToSpotlight,
     exportToMarkdown,
+    hydrateFromRemote,
   } = usePortfolio()
+
+  // Hydrate portfolio from remote data when sync pulls
+  useEffect(() => {
+    if (sync?.remoteData?.portfolio) {
+      hydrateFromRemote(sync.remoteData.portfolio)
+    }
+  }, [sync?.remoteData, hydrateFromRemote])
 
   const [showCreateModal, setShowCreateModal] = useState(false)
   const [detailProjectId, setDetailProjectId] = useState(null)

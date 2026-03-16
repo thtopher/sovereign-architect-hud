@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Shield, FolderKanban } from 'lucide-react'
 import HUD from './components/HUD'
 import PortfolioPage from './components/PortfolioPage'
+import useSync from './hooks/useSync'
 import './index.css'
 
 const TABS = [
@@ -11,6 +12,7 @@ const TABS = [
 
 function App() {
   const [activeTab, setActiveTab] = useState('hud')
+  const sync = useSync()
 
   return (
     <div className="min-h-screen w-full bg-game-darker">
@@ -39,8 +41,8 @@ function App() {
       </nav>
 
       {/* Content */}
-      {activeTab === 'hud' && <HUD />}
-      {activeTab === 'portfolio' && <PortfolioPage />}
+      {activeTab === 'hud' && <HUD sync={sync} />}
+      {activeTab === 'portfolio' && <PortfolioPage sync={sync} />}
     </div>
   )
 }
