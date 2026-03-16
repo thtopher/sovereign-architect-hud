@@ -8,11 +8,27 @@ import ShadowMonitor from './ShadowMonitor'
 import DailyPrompts from './DailyPrompts'
 import HorizontalSkills from './HorizontalSkills'
 import FirstTimeNudges, { isFirstTime } from './FirstTimeNudges'
+import SyncSettings from './SyncSettings'
 import useActivityLog from '../hooks/useActivityLog'
+import useGameState from '../hooks/useGameState'
+import useSync from '../hooks/useSync'
 
 const HUD = () => {
   const [currentTime, setCurrentTime] = useState(new Date())
-  const [sovereigntyLevel, setSovereigntyLevel] = useState(50) // Default to 50% (neutral)
+  const gameState = useGameState()
+  const { sovereigntyLevel, setSovereigntyLevel, currentPhase, shadows } = gameState
+
+  // Cloud sync
+  const sync = useSync()
+  const [showSyncSettings, setShowSyncSettings] = useState(false)
+
+  // Hydrate game state from remote data when sync pulls
+  const { hydrateFromRemote } = gameState
+  useEffect(() => {
+    if (sync.remoteData?.gameState) {
+      hydrateFromRemote(sync.remoteData.gameState)
+    }
+  }, [sync.remoteData, hydrateFromRemote])
 
   // First-time nudge tracking
   const [showNudges, setShowNudges] = useState(() => isFirstTime())
@@ -103,6 +119,11 @@ const HUD = () => {
   // Handle shadow change - log and show note prompt
   const handleShadowChange = (shadowId, intensity, previousIntensity) => {
     setShadowsChecked(true) // Mark for nudge dismissal
+    // Persist shadow state
+    gameState.setShadows({
+      ...shadows,
+      [shadowId]: intensity,
+    })
     const entryId = logShadow(shadowId, intensity)
     const action = intensity ? 'detected' : 'cleared'
     setNotePrompt({
@@ -128,6 +149,7 @@ const HUD = () => {
   // Handle loop phase change - log and show note prompt
   const handleLoopPhaseChange = (phase, previousPhase) => {
     setPhaseSet(true) // Mark for nudge dismissal
+    gameState.setCurrentPhase(phase)
     const entryId = logLoopPhase(phase)
     setNotePrompt({
       isOpen: true,
@@ -203,6 +225,9 @@ const HUD = () => {
         sovereignty={sovereigntyLevel}
         setSovereignty={setSovereigntyLevel}
         onSovereigntyChange={handleSovereigntyChange}
+        syncStatus={sync.status}
+        syncConnected={sync.isConnected}
+        onSyncClick={() => setShowSyncSettings(true)}
       />
 
       <div className="p-3 md:p-6 pb-6">
@@ -278,11 +303,13 @@ const HUD = () => {
               onPhaseChange={handleLoopPhaseChange}
               entries={entries}
               sovereignty={sovereigntyLevel}
+              initialPhase={currentPhase}
             />
 
             {/* Shadow Monitor */}
             <ShadowMonitor
               onShadowChange={handleShadowChange}
+              initialShadows={shadows}
             />
           </div>
         </div>
@@ -310,6 +337,17 @@ const HUD = () => {
           shadowsChecked={shadowsChecked}
         />
       )}
+
+      {/* Sync Settings Modal */}
+      <SyncSettings
+        isOpen={showSyncSettings}
+        onClose={() => setShowSyncSettings(false)}
+        syncState={sync}
+        onConnect={sync.connect}
+        onConnectWithGistId={sync.connectWithGistId}
+        onDisconnect={sync.disconnect}
+        onForcePush={sync.forcePush}
+      />
     </div>
   )
 }

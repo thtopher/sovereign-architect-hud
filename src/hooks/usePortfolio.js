@@ -1,6 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
-
-const STORAGE_KEY = 'sovereign-architect-portfolio'
+import storageAdapter, { STORAGE_KEY_PORTFOLIO as STORAGE_KEY } from '../storage/storageAdapter'
 const SPOTLIGHT_CAP = 8
 
 function generateId() {
@@ -8,16 +7,12 @@ function generateId() {
 }
 
 function loadProjects() {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY)
-    return raw ? JSON.parse(raw) : []
-  } catch {
-    return []
-  }
+  const parsed = storageAdapter.getItem(STORAGE_KEY)
+  return Array.isArray(parsed) ? parsed : []
 }
 
 function saveProjects(projects) {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(projects))
+  storageAdapter.setItem(STORAGE_KEY, projects)
 }
 
 // Freshness tiers based on last_activity_at

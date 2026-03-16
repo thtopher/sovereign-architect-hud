@@ -1,6 +1,7 @@
 import { useState, useRef } from 'react'
+import SyncIndicator from './SyncIndicator'
 
-const StickyResourceBar = ({ sovereignty, setSovereignty, onSovereigntyChange }) => {
+const StickyResourceBar = ({ sovereignty, setSovereignty, onSovereigntyChange, syncStatus, syncConnected, onSyncClick }) => {
   const [isDragging, setIsDragging] = useState(false)
   const startValueRef = useRef(sovereignty)
 
@@ -82,6 +83,13 @@ const StickyResourceBar = ({ sovereignty, setSovereignty, onSovereigntyChange })
               className="w-full h-2 accent-game-gold cursor-pointer"
             />
           </div>
+
+          {/* Sync Indicator */}
+          <SyncIndicator
+            status={syncStatus}
+            isConnected={syncConnected}
+            onClick={onSyncClick}
+          />
         </div>
       </div>
     </div>

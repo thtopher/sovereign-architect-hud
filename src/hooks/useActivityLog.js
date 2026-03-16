@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react'
-
-const STORAGE_KEY = 'sovereign-architect-activity-log'
+import storageAdapter, { STORAGE_KEY_ACTIVITY as STORAGE_KEY } from '../storage/storageAdapter'
 
 // Narrative templates for different action types
 const narrativeTemplates = {
@@ -759,9 +758,8 @@ export const useActivityLog = () => {
   // Load from LocalStorage on mount
   useEffect(() => {
     try {
-      const stored = localStorage.getItem(STORAGE_KEY)
-      if (stored) {
-        const parsed = JSON.parse(stored)
+      const parsed = storageAdapter.getItem(STORAGE_KEY)
+      if (parsed) {
         setEntries(Array.isArray(parsed) ? parsed : [])
       }
     } catch (e) {
@@ -774,7 +772,7 @@ export const useActivityLog = () => {
   useEffect(() => {
     if (isLoaded) {
       try {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(entries))
+        storageAdapter.setItem(STORAGE_KEY, entries)
       } catch (e) {
         console.error('Failed to save activity log:', e)
       }
